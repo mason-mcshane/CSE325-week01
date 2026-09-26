@@ -1,0 +1,93 @@
+Id: 5
+Name: Hawaiian
+Description: Ham and pineapple
+Price: 12
+
+PART 1: WEB API OUTPUT
+
+Pizza list:
+
+Id: 1
+Name: Pepperoni
+Description: Tomato sauce, Pepperoni
+Price: 12
+
+Id: 2
+Name: Hawaiian
+Description: Tomato sauce, Ham, Pineapple
+Price: 14
+
+Id: 3
+Name: Margherita
+Description: Tomato sauce, Mozzarella, Basil
+Price: 10
+
+Id: 4
+Name: Veggie
+Description: Tomato sauce, Mushrooms, Peppers, Olives
+Price: 11
+
+Additional record:
+
+Id: 5
+Name: BBQ Chicken
+Description: BBQ sauce, Chicken, Red Onion
+Price: 13
+
+PART 2: SALES SUMMARY FUNCTION
+
+static void GenerateSalesSummary()
+{
+string storesPath = Path.Combine("..", "stores");
+string[] storeDirectories = Directory.GetDirectories(storesPath);
+
+```
+decimal totalSales = 0;
+StringBuilder report = new StringBuilder();
+
+report.AppendLine("Sales Summary");
+report.AppendLine("----------------------------");
+report.AppendLine();
+
+report.AppendLine("Details:");
+
+foreach (string storeDirectory in storeDirectories)
+{
+    string storeNumber = Path.GetFileName(storeDirectory);
+    string salesTotalsFile = Path.Combine(storeDirectory, "salestotals.json");
+
+    if (File.Exists(salesTotalsFile))
+    {
+        string salesData = File.ReadAllText(salesTotalsFile);
+
+        using JsonDocument document = JsonDocument.Parse(salesData);
+
+        decimal storeTotal = 0;
+
+        foreach (JsonProperty property in document.RootElement.EnumerateObject())
+        {
+            if (property.Value.ValueKind == JsonValueKind.Number)
+            {
+                storeTotal += property.Value.GetDecimal();
+            }
+        }
+
+        totalSales += storeTotal;
+
+        report.AppendLine($" {storeNumber}: {storeTotal:C}");
+    }
+}
+
+report.Insert(
+    report.ToString().IndexOf("Details:"),
+    $" Total Sales: {totalSales:C}\n\n"
+);
+
+string reportFile = "sales-summary.txt";
+File.WriteAllText(reportFile, report.ToString());
+
+Console.WriteLine(report.ToString());
+Console.WriteLine($"Sales summary saved to {reportFile}");
+```
+
+}
